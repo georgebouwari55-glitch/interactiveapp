@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IB Masterclass — Build Your Trading Brain Inside Interactive Brokers</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      border-radius: 0 !important;
+    }
+
+    :root {
+      --bg-primary: #0A0A0F;
+      --bg-secondary: #0D0D15;
+      --bg-card: #111118;
+      --border: #1E1E2E;
+      --accent-blue: #2563EB;
+      --accent-blue-light: #3B74FF;
+      --accent-gold: #C9A84C;
+      --text-white: #FFFFFF;
+      --text-muted: #6B7280;
+      --green: #22C55E;
+      --red: #EF4444;
+      --ib-red: #C8102E;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --grid-bg: linear-gradient(#1E1E2E 1px, transparent 1px), linear-gradient(90deg, #1E1E2E 1px, transparent 1px);
+      --grid-size: 40px 40px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--bg-primary);
+      color: var(--text-white);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── Announcement Bar ── */
+    #announcement-bar {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .announcement-text {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--accent-gold);
+      letter-spacing: 0.04em;
+    }
+
+    .announcement-text strong {
+      color: var(--accent-gold);
+    }
+
+    .announcement-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 18px;
+      cursor: pointer;
+      padding: 0 4px;
+      line-height: 1;
+    }
+
+    .announcement-close:hover { color: var(--text-white); }
+
+    /* ── Navigation ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10, 10, 15, 0.95);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(8px);
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+
+    .ib-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .ib-mark {
+      width: 38px;
+      height: 38px;
+      background: var(--ib-red);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .ib-text {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .ib-name {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-gold);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .ib-sub {
+      font-family: var(--font-mono);
+      font-size: 8px;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.15s;
+    }
+
+    .nav-links a:hover { color: var(--text-white); }
+
+    .btn-primary {
+      background: var(--accent-blue);
+      color: var(--text-white);
+      border: 1px solid var(--accent-blue-light);
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.15s;
+      font-family: var(--font-body);
+    }
+
+    .btn-primary:hover { background: var(--accent-blue-light); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-white);
+      border: 1px solid var(--border);
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: border-color 0.15s;
+      font-family: var(--font-body);
+    }
+
+    .btn-ghost:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+
+    /* ── Hero Section ── */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 80px 40px;
+      background-color: var(--bg-primary);
+      background-image: var(--grid-bg);
+      background-size: var(--grid-size);
+      position: relative;
+    }
+
+    .hero-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .hero-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--accent-gold);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+    }
+
+    .hero-h1 {
+      font-size: clamp(40px, 6vw, 76px);
+      font-weight: 700;
+      line-height: 1.08;
+      color: var(--text-white);
+      margin-bottom: 28px;
+      max-width: 800px;
+    }
+
+    .hero-body {
+      font-size: 18px;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin-bottom: 40px;
+      line-height: 1.7;
+    }
+
+    .event-info-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0;
+      border: 1px solid var(--border);
+      margin-bottom: 40px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      overflow: hidden;
+    }
+
+    .event-info-item {
+      padding: 12px 20px;
+      border-right: 1px solid var(--border);
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .event-info-item:last-child { border-right: none; }
+
+    .event-info-item span {
+      color: var(--text-white);
+    }
+
+    .hero-ctas {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn-large {
+      padding: 16px 32px;
+      font-size: 16px;
+    }
+
+    /* ── Section Commons ── */
+    section {
+      padding: 100px 40px;
+    }
+
+    .section-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .section-alt {
+      background-color: var(--bg-secondary);
+      background-image: var(--grid-bg);
+      background-size: var(--grid-size);
+    }
+
+    .section-marker {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--accent-blue);
+      letter-spacing: 0.1em;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .section-number-bg {
+      position: absolute;
+      font-family: var(--font-mono);
+      font-size: 120px;
+      font-weight: 700;
+      color: var(--text-white);
+      opacity: 0.04;
+      line-height: 1;
+      pointer-events: none;
+      top: 40px;
+      right: 40px;
+      user-select: none;
+    }
+
+    .section-wrap {
+      position: relative;
+    }
+
+    .section-h2 {
+      font-size: clamp(28px, 4vw, 48px);
+      font-weight: 700;
+      line-height: 1.15;
+      color: var(--text-white);
+      margin-bottom: 8px;
+    }
+
+    .section-h2-accent {
+      color: var(--accent-blue);
+    }
+
+    .section-h2-sub {
+      font-size: clamp(22px, 3vw, 36px);
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 48px;
+    }
+
+    hr.divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 80px 0 0;
+    }
+
+    /* ── Section 01 — Problem ── */
+    #problem {
+      background-color: var(--bg-secondary);
+      background-image: var(--grid-bg);
+      background-size: var(--grid-size);
+    }
+
+    .problem-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: start;
+    }
+
+    .problem-text p {
+      font-size: 16px;
+      color: var(--text-muted);
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+
+    .problem-text p:last-child { margin-bottom: 0; }
+
+    .problem-stat {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--accent-gold);
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+      margin-top: 24px;
+    }
+
+    /* Terminal */
+    .terminal {
+      background: #0D0D15;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .terminal-header {
+      background: var(--border);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .terminal-dot {
+      width: 10px;
+      height: 10px;
+      background: var(--text-muted);
+      opacity: 0.4;
+    }
+
+    .terminal-body {
+      padding: 20px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.9;
+    }
+
+    .t-prompt { color: var(--accent-blue); }
+    .t-label { color: var(--text-muted); }
+    .t-value { color: var(--text-white); }
+    .t-ok { color: var(--green); }
+    .t-warn { color: var(--red); }
+    .t-section-label {
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+      margin-top: 8px;
+      padding-top: 12px;
+      display: block;
+    }
+    .t-divider {
+      color: var(--border);
+      display: block;
+    }
+
+    /* ── Section 02 — Curriculum ── */
+    #curriculum {
+      background-color: var(--bg-primary);
+    }
+
+    .curriculum-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+
+    .curriculum-card {
+      background: var(--bg-card);
+      padding: 36px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-number-bg {
+      position: absolute;
+      top: -10px;
+      right: 16px;
+      font-family: var(--font-mono);
+      font-size: 96px;
+      font-weight: 700;
+      color: var(--text-white);
+      opacity: 0.04;
+      line-height: 1;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .card-module-num {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      letter-spacing: 0.05em;
+    }
+
+    .card-title {
+      font-family: var(--font-mono);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-white);
+      letter-spacing: 0.05em;
+      margin-bottom: 14px;
+      text-transform: uppercase;
+    }
+
+    .card-body {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 20px;
+    }
+
+    .card-tag {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border: 1px solid;
+    }
+
+    .tag-blue {
+      color: var(--accent-blue);
+      border-color: var(--accent-blue);
+    }
+
+    .tag-gold {
+      color: var(--accent-gold);
+      border-color: var(--accent-gold);
+    }
+
+    /* ── Section 03 — Pricing ── */
+    #pricing {
+      background-color: var(--bg-secondary);
+      background-image: var(--grid-bg);
+      background-size: var(--grid-size);
+    }
+
+    .first-badge {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent-gold);
+      border: 1px solid var(--accent-gold);
+      padding: 6px 14px;
+      letter-spacing: 0.08em;
+      margin-bottom: 32px;
+    }
+
+    .value-stack {
+      border: 1px solid var(--border);
+      overflow: hidden;
+      margin-bottom: 40px;
+    }
+
+    .value-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 14px;
+    }
+
+    .value-row:last-child { border-bottom: none; }
+
+    .value-row-total {
+      background: var(--bg-card);
+    }
+
+    .value-check { color: var(--green); margin-right: 10px; }
+    .value-item { color: var(--text-muted); }
+    .value-price { color: var(--text-white); font-weight: 700; }
+    .value-total-label { color: var(--text-white); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+    .value-total-price { color: var(--accent-gold); font-weight: 700; font-size: 16px; }
+
+    .price-box {
+      border: 1px solid var(--accent-blue);
+      padding: 32px;
+      margin-bottom: 48px;
+      max-width: 540px;
+    }
+
+    .price-box-label {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--accent-blue);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .price-row:last-child { border-bottom: none; }
+    .price-row-val { color: var(--text-white); font-weight: 700; }
+    .price-row-discount { color: var(--green); font-weight: 700; }
+    .price-row-limited { color: var(--accent-gold); font-weight: 700; }
+
+    /* ── Registration Form ── */
+    .form-wrap {
+      max-width: 560px;
+    }
+
+    .form-label-top {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--accent-blue);
+      letter-spacing: 0.08em;
+      margin-bottom: 20px;
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-input {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-white);
+      padding: 14px 16px;
+      font-size: 14px;
+      font-family: var(--font-body);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .form-input:focus { border-color: var(--accent-blue); }
+    .form-input::placeholder { color: var(--text-muted); }
+
+    .form-checkbox-wrap {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    .form-checkbox-wrap input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      margin-top: 2px;
+      accent-color: var(--accent-blue);
+      cursor: pointer;
+    }
+
+    .btn-full { width: 100%; padding: 16px; font-size: 15px; font-weight: 700; letter-spacing: 0.04em; }
+
+    /* ── Section 04 — Testimonials ── */
+    #testimonials {
+      background-color: var(--bg-primary);
+    }
+
+    .testimonials-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+
+    .testimonial-item {
+      background: var(--bg-card);
+      padding: 32px 32px 32px 28px;
+      border-left: 3px solid var(--accent-gold);
+    }
+
+    .testimonial-quote {
+      font-size: 15px;
+      color: var(--text-white);
+      line-height: 1.7;
+      font-style: italic;
+      margin-bottom: 16px;
+    }
+
+    .testimonial-author {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+    }
+
+    /* ── Section 05 — FAQ ── */
+    #faq {
+      background-color: var(--bg-secondary);
+      background-image: var(--grid-bg);
+      background-size: var(--grid-size);
+    }
+
+    .faq-list {
+      border-top: 1px solid var(--border);
+    }
+
+    .faq-item {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .faq-question {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text-white);
+      list-style: none;
+      user-select: none;
+    }
+
+    .faq-question::-webkit-details-marker { display: none; }
+
+    .faq-icon {
+      font-family: var(--font-mono);
+      font-size: 20px;
+      color: var(--accent-blue);
+      flex-shrink: 0;
+      margin-left: 16px;
+      transition: transform 0.2s;
+    }
+
+    details[open] .faq-icon { transform: rotate(45deg); }
+
+    .faq-answer {
+      padding: 0 0 20px;
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      max-width: 720px;
+    }
+
+    /* ── Final CTA ── */
+    #final-cta {
+      background-color: var(--bg-primary);
+      border-left: 4px solid var(--accent-blue);
+    }
+
+    .final-badge {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      letter-spacing: 0.08em;
+      margin-bottom: 28px;
+    }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .footer-copy {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+    }
+
+    .footer-links a {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .footer-links a:hover { color: var(--text-white); }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      nav {
+        padding: 0 20px;
+        height: 56px;
+      }
+
+      .nav-links { display: none; }
+
+      section { padding: 60px 20px; }
+
+      #hero { padding: 60px 20px; }
+
+      .hero-h1 { font-size: 36px; }
+
+      .problem-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+
+      .curriculum-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .testimonials-list {
+        grid-template-columns: 1fr;
+      }
+
+      .event-info-bar {
+        flex-direction: column;
+      }
+
+      .event-info-item {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .event-info-item:last-child { border-bottom: none; }
+
+      .hero-ctas { flex-direction: column; }
+
+      .btn-large { width: 100%; text-align: center; }
+
+      #announcement-bar { flex-direction: column; gap: 8px; text-align: center; }
+
+      footer {
+        padding: 20px;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .section-number-bg { font-size: 72px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Announcement Bar ── -->
+  <div id="announcement-bar">
+    <span class="announcement-text">
+      [ <strong>EARLY BIRD</strong> ] Save $100 on your registration &mdash; Code: <strong>IBMASTER</strong> &mdash; First 20 spots only &rsaquo;
+    </span>
+    <button class="announcement-close" onclick="document.getElementById('announcement-bar').style.display='none'" aria-label="Close">&times;</button>
+  </div>
+
+  <!-- ── Navigation ── -->
+  <nav>
+    <a href="#" class="ib-logo">
+      <div class="ib-mark">IB</div>
+      <div class="ib-text">
+        <div class="ib-name">Interactive Brokers</div>
+        <div class="ib-sub">Your Global Trading Partner</div>
+      </div>
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="#curriculum">Program</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+
+    <a href="#register" class="btn-primary">Register &rarr;</a>
+  </nav>
+
+  <!-- ── Hero ── -->
+  <section id="hero">
+    <div class="hero-inner">
+      <p class="hero-eyebrow">// MASTERCLASS &middot; MAY 27, 2026 &middot; TEL AVIV</p>
+
+      <h1 class="hero-h1">
+        Build Your Trading Brain<br />
+        Inside Interactive Brokers
+      </h1>
+
+      <p class="hero-body">
+        A 4-hour in-person workshop for business owners who want their capital working with institutional-grade precision &mdash; not guesswork.
+      </p>
+
+      <div class="event-info-bar">
+        <div class="event-info-item"><span>&#128197;</span> 27.05.26</div>
+        <div class="event-info-item"><span>&#9201;</span> 16:00&ndash;20:00</div>
+        <div class="event-info-item"><span>&#128205;</span> Tel Aviv Financial Center</div>
+        <div class="event-info-item"><span>&#128293;</span> 20 Spots &mdash; 18 Taken</div>
+      </div>
+
+      <div class="hero-ctas">
+        <a href="#register" class="btn-primary btn-large">Register Now &rarr;</a>
+        <a href="#curriculum" class="btn-ghost btn-large">View Program &darr;</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Section 01 — Problem ── -->
+  <section id="problem" class="section-wrap">
+    <div class="section-number-bg">01</div>
+    <div class="section-inner">
+      <span class="section-marker">_01</span>
+      <h2 class="section-h2">You have capital.</h2>
+      <h2 class="section-h2 section-h2-accent" style="margin-bottom: 48px;">But your broker doesn't teach you how to use it.</h2>
+
+      <div class="problem-grid">
+        <div class="problem-text">
+          <p>Every day you open a position without a plan. Guessing entries. Ignoring drawdowns. Leaving returns behind. That ends here.</p>
+          <p>In this masterclass, you build a real trading system &mdash; inside the platform that powers institutional desks globally. With playbooks tuned to your exact portfolio, risk tolerance, and goals.</p>
+          <p>99% of retail investors have never accessed this methodology.</p>
+          <div class="problem-stat">// MOST BUSINESS OWNERS MANAGE CAPITAL REACTIVELY. YOU WON'T.</div>
+        </div>
+
+        <!-- Terminal -->
+        <div class="terminal">
+          <div class="terminal-header">
+            <div class="terminal-dot"></div>
+            <div class="terminal-dot"></div>
+            <div class="terminal-dot"></div>
+          </div>
+          <div class="terminal-body">
+            <div><span class="t-prompt">&gt;</span> <span class="t-value">PORTFOLIO AUDIT</span> <span class="t-divider">─────────────────</span></div>
+            <div>&nbsp;&nbsp;<span class="t-label">Entry logic: &nbsp;&nbsp;&nbsp;&nbsp;</span><span class="t-warn">UNDEFINED</span></div>
+            <div>&nbsp;&nbsp;<span class="t-label">Exit rules: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="t-warn">UNDEFINED</span></div>
+            <div>&nbsp;&nbsp;<span class="t-label">Risk per trade: &nbsp;</span><span class="t-warn">UNKNOWN</span></div>
+            <div>&nbsp;&nbsp;<span class="t-label">Max drawdown: &nbsp;&nbsp;&nbsp;</span><span class="t-warn">UNCAPPED</span></div>
+            <div>&nbsp;&nbsp;<span class="t-label">Hedge ratio: &nbsp;&nbsp;&nbsp;&nbsp;</span><span class="t-warn">0%</span></div>
+            <div style="margin-top: 8px;"><span class="t-prompt">&gt;</span> <span class="t-label">SYSTEM STATUS:</span> <span class="t-warn">CRITICAL &#9888;</span></div>
+            <div style="margin-top: 8px;"><span class="t-divider">─────────────────────────────────</span></div>
+            <div style="margin-top: 8px;"><span class="t-prompt">&gt;</span> <span class="t-value">After Masterclass:</span></div>
+            <div>&nbsp;&nbsp;<span class="t-label">Entry logic: &nbsp;&nbsp;&nbsp;&nbsp;</span><span class="t-ok">RULE-BASED &#10003;</span></div>
+            <div>&nbsp;&nbsp;<span class="t-label">Risk per trade: &nbsp;</span><span class="t-ok">1.5% MAX &#10003;</span></div>
+            <div>&nbsp;&nbsp;<span class="t-label">Max drawdown: &nbsp;&nbsp;&nbsp;</span><span class="t-ok">-8% HARD STOP &#10003;</span></div>
+            <div style="margin-top: 8px;"><span class="t-prompt">&gt;</span> <span class="t-label">SYSTEM STATUS:</span> <span class="t-ok">OPERATIONAL &#10003;</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Section 02 — Curriculum ── -->
+  <section id="curriculum" class="section-wrap">
+    <div class="section-number-bg">02</div>
+    <div class="section-inner">
+      <span class="section-marker">_02</span>
+      <h2 class="section-h2">What you learn.</h2>
+      <p class="section-h2-sub">Four modules. One complete system.</p>
+
+      <div class="curriculum-grid">
+        <!-- Card 01 -->
+        <div class="curriculum-card">
+          <div class="card-number-bg">01</div>
+          <div class="card-module-num">[ 01 ]</div>
+          <div class="card-title">Platform Mastery</div>
+          <p class="card-body">We map your complete IB setup together: account structure, margin, options, screeners, TWS configuration. Leave knowing every tool in your arsenal.</p>
+          <span class="card-tag tag-blue">Built Together</span>
+        </div>
+
+        <!-- Card 02 -->
+        <div class="curriculum-card">
+          <div class="card-number-bg">02</div>
+          <div class="card-module-num">[ 02 ]</div>
+          <div class="card-title">Portfolio Architecture</div>
+          <p class="card-body">Install the exact portfolio frameworks used to manage 6-figure monthly returns. Entry logic, exit rules, position sizing formulas, correlation management.</p>
+          <span class="card-tag tag-blue">Ready-to-Use</span>
+        </div>
+
+        <!-- Card 03 -->
+        <div class="curriculum-card">
+          <div class="card-number-bg">03</div>
+          <div class="card-module-num">[ 03 ]</div>
+          <div class="card-title">Risk &amp; Drawdown Control</div>
+          <p class="card-body">Set hard stop rules, max drawdown limits, and portfolio-level hedges using our proprietary risk system. Nobody in Israel has access to this.</p>
+          <span class="card-tag tag-gold">EXCLUSIVE</span>
+        </div>
+
+        <!-- Card 04 -->
+        <div class="curriculum-card">
+          <div class="card-number-bg">04</div>
+          <div class="card-module-num">[ 04 ]</div>
+          <div class="card-title">Live Trading + Networking</div>
+          <p class="card-body">Execute real trades alongside fellow business owners. Share strategies, absorb knowledge, build connections with investors who think like you.</p>
+          <span class="card-tag tag-gold">Connections Worth Gold</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Section 03 — Value Stack + Pricing ── -->
+  <section id="pricing" class="section-wrap section-alt">
+    <div class="section-number-bg">03</div>
+    <div class="section-inner">
+      <span class="section-marker">_03</span>
+      <div class="first-badge">&#9733; FIRST OF ITS KIND IN ISRAEL</div>
+      <h2 class="section-h2">What is this worth to you?</h2>
+      <p class="section-h2-sub" style="margin-bottom: 40px;">&nbsp;</p>
+
+      <!-- Value Stack -->
+      <div class="value-stack">
+        <div class="value-row">
+          <span><span class="value-check">&#10003;</span><span class="value-item">4 hours of live practical training</span></span>
+          <span class="value-price">$1,497</span>
+        </div>
+        <div class="value-row">
+          <span><span class="value-check">&#10003;</span><span class="value-item">Portfolio &amp; Strategy Playbook Bundle</span></span>
+          <span class="value-price">$997</span>
+        </div>
+        <div class="value-row">
+          <span><span class="value-check">&#10003;</span><span class="value-item">Personal Trading System Blueprint</span></span>
+          <span class="value-price">$597</span>
+        </div>
+        <div class="value-row">
+          <span><span class="value-check">&#10003;</span><span class="value-item">Pro Risk Management Templates</span></span>
+          <span class="value-price">$7,999</span>
+        </div>
+        <div class="value-row">
+          <span><span class="value-check">&#10003;</span><span class="value-item">Private Investor Community Access</span></span>
+          <span class="value-price">$497</span>
+        </div>
+        <div class="value-row value-row-total">
+          <span class="value-total-label">Total Value</span>
+          <span class="value-total-price">$11,587</span>
+        </div>
+      </div>
+
+      <!-- Price Reveal Box -->
+      <div class="price-box">
+        <div class="price-box-label">&gt; FOR OUR COMMUNITY:</div>
+        <div class="price-row">
+          <span>Single Ticket &mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;</span>
+          <span class="price-row-val">$597</span>
+        </div>
+        <div class="price-row">
+          <span>Couple Ticket &mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;</span>
+          <span class="price-row-val">$950</span>
+        </div>
+        <div class="price-row">
+          <span>Code IBMASTER &mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;</span>
+          <span class="price-row-discount">&minus;$100</span>
+        </div>
+        <div class="price-row">
+          <span>First 20 only &mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;</span>
+          <span class="price-row-limited">LIMITED</span>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <div id="register" class="form-wrap">
+        <span class="form-label-top">&gt; REGISTER FOR MASTERCLASS</span>
+        <form action="#" method="post">
+          <div class="form-group">
+            <input type="text" class="form-input" placeholder="Full Name" required />
+          </div>
+          <div class="form-group">
+            <input type="email" class="form-input" placeholder="Email Address" required />
+          </div>
+          <div class="form-group">
+            <input type="tel" class="form-input" placeholder="Phone Number" />
+          </div>
+          <div class="form-checkbox-wrap">
+            <input type="checkbox" id="consent" required />
+            <label for="consent">I agree to receive information about this masterclass and IB-related updates. No spam.</label>
+          </div>
+          <button type="submit" class="btn-primary btn-full">REGISTER NOW &rarr;</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Section 04 — Testimonials ── -->
+  <section id="testimonials" class="section-wrap">
+    <div class="section-number-bg">04</div>
+    <div class="section-inner">
+      <span class="section-marker">_04</span>
+      <h2 class="section-h2" style="margin-bottom: 48px;">What participants say.</h2>
+
+      <div class="testimonials-list">
+        <div class="testimonial-item">
+          <p class="testimonial-quote">"I walked in knowing nothing about IB's platform. I walked out with a complete trading system."</p>
+          <div class="testimonial-author">&mdash; Amit G., Business Owner</div>
+        </div>
+        <div class="testimonial-item">
+          <p class="testimonial-quote">"The risk module alone was worth 10x the price. Drawdowns down 60% since the masterclass."</p>
+          <div class="testimonial-author">&mdash; Amit L., Entrepreneur</div>
+        </div>
+        <div class="testimonial-item">
+          <p class="testimonial-quote">"I've attended 6 trading workshops. This is the only one I'd pay for twice. Operational, not theoretical."</p>
+          <div class="testimonial-author">&mdash; Noa K., Real Estate Investor</div>
+        </div>
+        <div class="testimonial-item">
+          <p class="testimonial-quote">"Built my first real position sizing formula during the session. It's been running for 3 months without a single margin call."</p>
+          <div class="testimonial-author">&mdash; David R., Tech Executive</div>
+        </div>
+        <div class="testimonial-item">
+          <p class="testimonial-quote">"The IB platform always felt overwhelming. After 4 hours, it felt like a competitive advantage."</p>
+          <div class="testimonial-author">&mdash; Yael M., Portfolio Manager</div>
+        </div>
+        <div class="testimonial-item">
+          <p class="testimonial-quote">"The connections alone made it worthwhile. I'm now in a group of 8 investors who share strategies weekly."</p>
+          <div class="testimonial-author">&mdash; Ron S., Business Owner</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Section 05 — FAQ ── -->
+  <section id="faq" class="section-wrap section-alt">
+    <div class="section-number-bg">05</div>
+    <div class="section-inner">
+      <span class="section-marker">_05</span>
+      <h2 class="section-h2" style="margin-bottom: 48px;">Every question answered.</h2>
+
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary class="faq-question">
+            I'm not a professional trader. Is this for me?
+            <span class="faq-icon">+</span>
+          </summary>
+          <p class="faq-answer">Yes. Built for business owners, executives, and entrepreneurs. No trading license or coding needed. Plain language throughout.</p>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
+            What do I need to bring?
+            <span class="faq-icon">+</span>
+          </summary>
+          <p class="faq-answer">Laptop (Mac or Windows), active IB account (setup guide sent ahead), and the drive to build something serious.</p>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
+            Can I really build a professional system in 4 hours?
+            <span class="faq-icon">+</span>
+          </summary>
+          <p class="faq-answer">This page was built using the exact methodology you'll learn. Yes.</p>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
+            Will there be a recording?
+            <span class="faq-icon">+</span>
+          </summary>
+          <p class="faq-answer">No. In-person only. 20 investors, live market data, one coach. Not a course &mdash; a live build session.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Final CTA ── -->
+  <section id="final-cta">
+    <div class="section-inner">
+      <div class="final-badge">[ IB-MASTER-2705 ]</div>
+      <h2 class="section-h2">Markets don't wait.</h2>
+      <h2 class="section-h2 section-h2-accent" style="margin-bottom: 48px;">Are you in?</h2>
+
+      <div class="form-wrap">
+        <span class="form-label-top">&gt; SECURE YOUR SPOT</span>
+        <form action="#" method="post">
+          <div class="form-group">
+            <input type="text" class="form-input" placeholder="Full Name" required />
+          </div>
+          <div class="form-group">
+            <input type="email" class="form-input" placeholder="Email Address" required />
+          </div>
+          <div class="form-group">
+            <input type="tel" class="form-input" placeholder="Phone Number" />
+          </div>
+          <div class="form-checkbox-wrap">
+            <input type="checkbox" id="consent2" required />
+            <label for="consent2">I agree to receive information about this masterclass and IB-related updates. No spam.</label>
+          </div>
+          <button type="submit" class="btn-primary btn-full">SECURE MY SPOT &rarr;</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ── -->
+  <footer>
+    <span class="footer-copy">&copy; 2026 IB Masterclass. All rights reserved.</span>
+    <div class="footer-links">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Use</a>
+    </div>
+  </footer>
+
+  <script>
+    // FAQ accordion — details/summary handles natively, but we sync the icon
+    document.querySelectorAll('details.faq-item').forEach(function(detail) {
+      detail.addEventListener('toggle', function() {
+        // icon rotation is handled via CSS details[open] .faq-icon
+      });
+    });
+
+    // Close one FAQ when another opens (optional UX: comment out if you want multi-open)
+    document.querySelectorAll('details.faq-item').forEach(function(detail) {
+      detail.addEventListener('toggle', function() {
+        if (detail.open) {
+          document.querySelectorAll('details.faq-item').forEach(function(other) {
+            if (other !== detail && other.open) {
+              other.removeAttribute('open');
+            }
+          });
+        }
+      });
+    });
+
+    // Smooth active nav highlight on scroll
+    var sections = document.querySelectorAll('section[id]');
+    var navLinks = document.querySelectorAll('.nav-links a');
+
+    function onScroll() {
+      var scrollPos = window.scrollY + 100;
+      sections.forEach(function(section) {
+        if (scrollPos >= section.offsetTop && scrollPos < section.offsetTop + section.offsetHeight) {
+          navLinks.forEach(function(link) {
+            link.style.color = '';
+            if (link.getAttribute('href') === '#' + section.id) {
+              link.style.color = '#FFFFFF';
+            }
+          });
+        }
+      });
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+  </script>
+
+</body>
+</html>
