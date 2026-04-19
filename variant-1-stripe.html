@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IB Master — Interactive Brokers Masterclass | May 27, 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── Reset & Base ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:       #0B1426;
+      --navy-dark:  #060D1A;
+      --navy-mid:   #0E1A30;
+      --gold-start: #C9A84C;
+      --gold-end:   #FFD700;
+      --gold-grad:  linear-gradient(135deg, #C9A84C, #FFD700);
+      --blue:       #1E6FFF;
+      --white:      #FFFFFF;
+      --muted:      #8899AA;
+      --red:        #C8102E;
+      --card-bg:    rgba(255,255,255,0.05);
+      --card-border:rgba(201,168,76,0.2);
+      --radius-card:12px;
+      --radius-btn: 8px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--navy);
+      color: var(--white);
+      font-weight: 400;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ─── Typography Utilities ──────────────────────────────────── */
+    .text-gold       { background: var(--gold-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .text-muted      { color: var(--muted); }
+    .text-white      { color: var(--white); }
+    .font-300        { font-weight: 300; }
+    .font-500        { font-weight: 500; }
+    .font-600        { font-weight: 600; }
+    .font-700        { font-weight: 700; }
+    .italic          { font-style: italic; }
+    .small-caps      { font-variant: small-caps; letter-spacing: 0.12em; }
+
+    /* ─── Buttons ───────────────────────────────────────────────── */
+    .btn-gold {
+      display: inline-block;
+      background: var(--gold-grad);
+      color: var(--navy-dark);
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 0.85rem 2rem;
+      border-radius: var(--radius-btn);
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 0 30px rgba(255,215,0,0.3);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      white-space: nowrap;
+    }
+    .btn-gold:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 45px rgba(255,215,0,0.5);
+    }
+    .btn-gold-lg {
+      font-size: 1.15rem;
+      padding: 1.1rem 2.8rem;
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+    }
+
+    /* ─── Glass Cards ───────────────────────────────────────────── */
+    .glass-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-card);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    /* ─── Section Wrappers ──────────────────────────────────────── */
+    .section { padding: 100px 0; position: relative; }
+    .container { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+
+    /* Section number watermark */
+    .section-num {
+      position: absolute;
+      top: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: clamp(80px, 14vw, 180px);
+      font-weight: 700;
+      color: rgba(255,255,255,0.04);
+      pointer-events: none;
+      user-select: none;
+      letter-spacing: -0.05em;
+      z-index: 0;
+    }
+    .section-inner { position: relative; z-index: 1; }
+
+    /* ─── Section transitions ───────────────────────────────────── */
+    .section-dark    { background: var(--navy-dark); }
+    .section-mid     { background: var(--navy-mid); }
+    .section-default { background: var(--navy); }
+
+    /* Gradient dividers */
+    .grad-top {
+      background: linear-gradient(180deg, var(--navy) 0%, var(--navy-dark) 100%);
+    }
+    .grad-bottom {
+      background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 100%);
+    }
+
+    /* ─── Announcement Bar ──────────────────────────────────────── */
+    #announcement-bar {
+      background: var(--gold-grad);
+      color: var(--navy-dark);
+      text-align: center;
+      padding: 10px 60px 10px 24px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      line-height: 1.4;
+    }
+    #announcement-bar a {
+      color: var(--navy-dark);
+      font-weight: 700;
+      text-decoration: underline;
+      margin-left: 8px;
+    }
+    #announcement-bar a:hover { opacity: 0.75; }
+    #ann-dismiss {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: var(--navy-dark);
+      opacity: 0.7;
+      line-height: 1;
+    }
+    #ann-dismiss:hover { opacity: 1; }
+
+    /* ─── Navigation ────────────────────────────────────────────── */
+    #navbar {
+      position: sticky;
+      top: 44px;
+      z-index: 999;
+      padding: 18px 0;
+      transition: background 0.3s ease, backdrop-filter 0.3s ease, box-shadow 0.3s ease;
+    }
+    #navbar.scrolled {
+      background: rgba(11,20,38,0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 1px 0 rgba(201,168,76,0.15);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* IB Logo */
+    .ib-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .ib-bull {
+      color: var(--red);
+      font-size: 1.5rem;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+    }
+    .ib-name {
+      color: var(--white);
+      font-weight: 700;
+      font-size: 0.95rem;
+      line-height: 1.2;
+    }
+    .ib-tagline {
+      color: #C9A84C;
+      font-size: 0.68rem;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+    }
+
+    /* ─── Hero ──────────────────────────────────────────────────── */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      background: radial-gradient(ellipse at 60% 30%, rgba(30,111,255,0.12) 0%, transparent 60%),
+                  radial-gradient(ellipse at 20% 70%, rgba(201,168,76,0.08) 0%, transparent 50%),
+                  var(--navy-dark);
+      padding: 120px 0 80px;
+    }
+    .hero-inner { text-align: center; }
+
+    .hero-sub {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      color: #C9A84C;
+      margin-bottom: 28px;
+      text-transform: uppercase;
+    }
+    .hero-h1 {
+      font-size: clamp(2.4rem, 5.5vw, 4.2rem);
+      font-weight: 700;
+      line-height: 1.12;
+      margin-bottom: 28px;
+      letter-spacing: -0.02em;
+    }
+    .hero-body {
+      font-size: 1.1rem;
+      font-weight: 300;
+      color: var(--muted);
+      max-width: 640px;
+      margin: 0 auto 48px;
+      line-height: 1.75;
+    }
+
+    /* Hero info grid */
+    .hero-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+    .hero-card {
+      padding: 20px 16px;
+      text-align: center;
+    }
+    .hero-card .card-icon { font-size: 1.4rem; margin-bottom: 8px; }
+    .hero-card .card-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .hero-card .card-value {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--white);
+    }
+    .hero-cta { display: flex; justify-content: center; }
+
+    /* ─── Problem Section ───────────────────────────────────────── */
+    #problem { padding-top: 120px; padding-bottom: 120px; }
+    .problem-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+    .problem-text h2 {
+      font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 20px;
+    }
+    .problem-text h2 em {
+      font-style: italic;
+      background: var(--gold-grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .problem-text p {
+      color: var(--muted);
+      font-weight: 300;
+      font-size: 1.05rem;
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+    .problem-text p:last-child { margin-bottom: 0; }
+
+    /* CSS Candlestick chart */
+    .chart-visual {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      height: 220px;
+      padding: 24px;
+      justify-content: center;
+    }
+    .candle-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+    .candle-wick {
+      width: 2px;
+      border-radius: 1px;
+    }
+    .candle-body {
+      width: 18px;
+      border-radius: 3px;
+    }
+    .candle-wick-top  { }
+    .candle-wick-bot  { }
+    .candle-gold { background: var(--gold-start); }
+    .candle-blue { background: var(--blue); }
+    .candle-red  { background: #C8102E; }
+
+    /* ─── Curriculum Section ────────────────────────────────────── */
+    #curriculum { background: var(--navy-dark); }
+    .curriculum-header { text-align: center; margin-bottom: 56px; }
+    .curriculum-header h2 {
+      font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .curriculum-header p {
+      color: var(--muted);
+      font-size: 1rem;
+      font-style: italic;
+    }
+    .curriculum-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+    .curriculum-card {
+      padding: 36px 32px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .curriculum-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 60px rgba(201,168,76,0.1);
+    }
+    .curriculum-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--gold-grad);
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+    .curriculum-card:hover::before { opacity: 1; }
+    .card-num {
+      font-size: 2.5rem;
+      font-weight: 700;
+      opacity: 0.15;
+      color: var(--white);
+      line-height: 1;
+      margin-bottom: 16px;
+    }
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--white);
+    }
+    .card-desc {
+      font-size: 0.92rem;
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 20px;
+    }
+    .card-tag {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      padding: 5px 12px;
+      border-radius: 20px;
+      background: rgba(201,168,76,0.12);
+      border: 1px solid rgba(201,168,76,0.3);
+      color: #C9A84C;
+    }
+
+    /* ─── Pricing Section ───────────────────────────────────────── */
+    #pricing { background: var(--navy-mid); }
+    .pricing-badge {
+      display: inline-block;
+      background: var(--gold-grad);
+      color: var(--navy-dark);
+      font-weight: 700;
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      padding: 6px 16px;
+      border-radius: 20px;
+      margin-bottom: 28px;
+    }
+    .pricing-header { text-align: center; margin-bottom: 56px; }
+    .pricing-header h2 {
+      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .value-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 48px;
+    }
+    .value-table tr {
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .value-table tr:last-child {
+      border-bottom: none;
+    }
+    .value-table td {
+      padding: 16px 20px;
+      font-size: 0.95rem;
+    }
+    .value-table td:first-child {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--white);
+      font-weight: 400;
+    }
+    .value-table td:last-child {
+      text-align: right;
+      color: var(--muted);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .value-table tr.total-row td {
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+    .value-table tr.total-row td:first-child { color: var(--white); }
+    .value-table tr.total-row td:last-child {
+      background: var(--gold-grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .check-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(201,168,76,0.15);
+      border: 1px solid rgba(201,168,76,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: #C9A84C;
+      font-size: 0.75rem;
+    }
+    .price-card {
+      padding: 40px;
+      text-align: center;
+      margin-bottom: 56px;
+    }
+    .price-intro {
+      font-size: 1rem;
+      color: var(--muted);
+      font-weight: 300;
+      margin-bottom: 28px;
+    }
+    .price-options {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+    .price-option {
+      text-align: center;
+    }
+    .price-option-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .price-amount {
+      font-size: 2.6rem;
+      font-weight: 700;
+      background: var(--gold-grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+    }
+    .price-note {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-style: italic;
+      margin-top: 6px;
+    }
+    .price-divider {
+      width: 1px;
+      background: rgba(255,255,255,0.1);
+      margin: 0 8px;
+    }
+    .coupon-note {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .coupon-note strong { color: #FFD700; }
+    .early-note {
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* ─── Registration Form ─────────────────────────────────────── */
+    .reg-section { padding: 48px 0 16px; }
+    .form-card {
+      max-width: 560px;
+      margin: 0 auto;
+      padding: 40px;
+    }
+    .form-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 6px;
+    }
+    .form-subtitle {
+      font-size: 0.9rem;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .progress-wrap {
+      background: rgba(255,255,255,0.08);
+      border-radius: 20px;
+      height: 8px;
+      margin-bottom: 28px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 80%;
+      background: var(--gold-grad);
+      border-radius: 20px;
+      position: relative;
+    }
+    .progress-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-align: right;
+      margin-top: 6px;
+      margin-bottom: 24px;
+    }
+    .form-field {
+      margin-bottom: 16px;
+    }
+    .form-field label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .form-field input[type="text"],
+    .form-field input[type="email"],
+    .form-field input[type="tel"] {
+      width: 100%;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-size: 0.95rem;
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
+      color: var(--white);
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+    .form-field input::placeholder { color: rgba(136,153,170,0.5); }
+    .form-field input:focus { border-color: rgba(201,168,76,0.6); }
+    .form-checkbox {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 24px;
+      margin-top: 8px;
+    }
+    .form-checkbox input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #C9A84C;
+      flex-shrink: 0;
+      margin-top: 2px;
+      cursor: pointer;
+    }
+    .form-checkbox label {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.5;
+      cursor: pointer;
+    }
+    .form-submit { text-align: center; }
+    .form-sub-note {
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 14px;
+    }
+
+    /* ─── Testimonials ──────────────────────────────────────────── */
+    #testimonials { background: var(--navy-dark); }
+    .testimonials-header { text-align: center; margin-bottom: 56px; }
+    .testimonials-header h2 {
+      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .testimonials-header p {
+      color: var(--muted);
+      font-style: italic;
+    }
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+    .testimonial-card {
+      padding: 32px;
+      position: relative;
+    }
+    .quote-mark {
+      font-size: 4rem;
+      line-height: 0.7;
+      font-weight: 700;
+      color: #C9A84C;
+      opacity: 0.6;
+      margin-bottom: 16px;
+      display: block;
+      font-family: Georgia, serif;
+    }
+    .testimonial-text {
+      font-size: 0.95rem;
+      color: var(--muted);
+      font-weight: 300;
+      line-height: 1.7;
+      margin-bottom: 20px;
+    }
+    .testimonial-author strong { color: #C9A84C; font-weight: 700; font-size: 0.92rem; }
+    .testimonial-author span  { color: var(--muted); font-size: 0.82rem; margin-left: 6px; }
+
+    /* ─── FAQ Section ───────────────────────────────────────────── */
+    #faq { background: var(--navy-mid); }
+    .faq-header { text-align: center; margin-bottom: 56px; }
+    .faq-header h2 {
+      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .faq-header p {
+      color: var(--muted);
+      font-style: italic;
+    }
+    .faq-list { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+    .faq-item {
+      border: 1px solid rgba(201,168,76,0.15);
+      border-radius: var(--radius-card);
+      overflow: hidden;
+      transition: border-color 0.25s ease;
+    }
+    .faq-item.open { border-color: rgba(201,168,76,0.45); }
+    .faq-question {
+      width: 100%;
+      background: rgba(255,255,255,0.03);
+      border: none;
+      padding: 22px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      cursor: pointer;
+      text-align: left;
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: background 0.2s ease;
+    }
+    .faq-item.open .faq-question { background: rgba(201,168,76,0.06); }
+    .faq-icon {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1px solid rgba(201,168,76,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #C9A84C;
+      font-size: 1.2rem;
+      transition: transform 0.25s ease;
+      font-weight: 300;
+    }
+    .faq-item.open .faq-icon { transform: rotate(45deg); }
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease, padding 0.35s ease;
+    }
+    .faq-answer-inner {
+      padding: 0 24px 22px;
+      font-size: 0.95rem;
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+    .faq-item.open .faq-answer { max-height: 300px; }
+
+    /* ─── Final CTA ─────────────────────────────────────────────── */
+    #final-cta {
+      background: radial-gradient(ellipse at 50% 0%, rgba(201,168,76,0.08) 0%, transparent 60%),
+                  var(--navy-dark);
+      padding: 120px 0;
+      text-align: center;
+    }
+    .final-badge {
+      display: inline-block;
+      border: 1px solid rgba(201,168,76,0.4);
+      border-radius: 20px;
+      padding: 6px 18px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: #C9A84C;
+      margin-bottom: 16px;
+    }
+    .final-micro {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+    .final-h2 {
+      font-size: clamp(2rem, 4.5vw, 3.2rem);
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 60px;
+    }
+    .final-h2 span {
+      display: block;
+      background: var(--gold-grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ─── Footer ────────────────────────────────────────────────── */
+    footer {
+      background: var(--navy-dark);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 32px 24px;
+      text-align: center;
+    }
+    .footer-links {
+      margin-bottom: 12px;
+    }
+    .footer-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      margin: 0 12px;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--white); }
+    .footer-copy {
+      font-size: 0.8rem;
+      color: rgba(136,153,170,0.5);
+    }
+
+    /* ─── Responsive ────────────────────────────────────────────── */
+    @media (max-width: 1024px) {
+      .hero-grid { grid-template-columns: repeat(2, 1fr); }
+      .problem-inner { grid-template-columns: 1fr; gap: 40px; }
+      .curriculum-grid { grid-template-columns: 1fr; }
+      .testimonials-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      .section { padding: 80px 0; }
+      #hero { padding: 80px 0 60px; }
+      .hero-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+      .hero-h1 { font-size: 2rem; }
+      .btn-gold-lg { font-size: 1rem; padding: 1rem 1.6rem; }
+      .curriculum-grid { grid-template-columns: 1fr; }
+      .price-options { flex-direction: column; align-items: center; }
+      .price-divider { display: none; }
+      .form-card { padding: 28px 20px; }
+      .testimonials-grid { grid-template-columns: 1fr; }
+      .value-table td { padding: 12px 10px; font-size: 0.85rem; }
+      #announcement-bar { padding: 10px 56px 10px 12px; font-size: 0.78rem; }
+      .chart-visual { display: none; }
+      .problem-inner { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) {
+      .hero-grid { grid-template-columns: 1fr 1fr; }
+      .nav-inner { gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <!-- 1. ANNOUNCEMENT BAR                                        -->
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <div id="announcement-bar">
+    🔥 Early Bird Offer: Save $100 — First 20 registrations only&nbsp;|&nbsp;Use code <strong>"IBMASTER"</strong> at checkout →
+    <a href="#pricing">Claim Discount</a>
+    <button id="ann-dismiss" aria-label="Dismiss">&times;</button>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <!-- 2. NAVIGATION                                              -->
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <nav id="navbar">
+    <div class="container">
+      <div class="nav-inner">
+        <a href="#hero" class="ib-logo">
+          <span class="ib-bull">&#9650;</span>
+          <div>
+            <div class="ib-name">Interactive Brokers</div>
+            <div class="ib-tagline">Your Global Trading Partner</div>
+          </div>
+        </a>
+        <a href="#pricing" class="btn-gold">Reserve My Seat →</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <!-- 3. HERO                                                    -->
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <section id="hero">
+    <div class="container">
+      <div class="hero-inner">
+        <p class="hero-sub small-caps">Exclusive Hands-On Masterclass for Business Owners</p>
+        <h1 class="hero-h1">
+          Build Your Trading&nbsp;🧠<br />
+          Inside <span class="text-gold">Interactive Brokers</span>
+        </h1>
+        <p class="hero-body font-300">
+          Four hours. Leave with a complete trading system that knows your risk profile,
+          your goals, and your strategy — built inside the world's most powerful trading platform.
+        </p>
+        <div class="hero-grid">
+          <div class="glass-card hero-card">
+            <div class="card-icon">📅</div>
+            <div class="card-label">Date</div>
+            <div class="card-value">May 27, 2026 · 16:00–20:00</div>
+          </div>
+          <div class="glass-card hero-card">
+            <div class="card-icon">⏱</div>
+            <div class="card-label">Duration</div>
+            <div class="card-value">4 Hours</div>
+          </div>
+          <div class="glass-card hero-card">
+            <div class="card-icon">🏛</div>
+            <div class="card-label">Location</div>
+            <div class="card-value">Tel Aviv Financial Center | 8 Rothschild Blvd</div>
+          </div>
+          <div class="glass-card hero-card">
+            <div class="card-icon">🔥</div>
+            <div class="card-label">Spots</div>
+            <div class="card-value" style="color:#FFD700;">Only 20 Left</div>
+          </div>
+        </div>
+        <div class="hero-cta">
+          <a href="#pricing" class="btn-gold btn-gold-lg">Reserve My Seat →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <!-- 4. PROBLEM (Section 01)                                    -->
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <section id="problem" class="section grad-top">
+    <div class="section-num">01</div>
+    <div class="container section-inner">
+      <div class="problem-inner">
+        <div class="problem-text">
+          <h2>
+            You have capital.<br />
+            But your broker doesn't teach you<br />
+            <em>how to use it.</em>
+          </h2>
+          <p>
+            Every morning you open a new position without a plan. You're guessing entry points,
+            ignoring risk management, and leaving returns on the table. That stops here.
+          </p>
+          <p>
+            In this masterclass, you build a real trading system. Connected to Interactive Brokers,
+            with strategies and playbooks tailored to your goals, your portfolio, and your risk tolerance.
+          </p>
+          <p>
+            Leave with a tool that doesn't just save you on fees — it transforms the returns you walk
+            away with. 99% of retail investors have never seen this approach.
+          </p>
+        </div>
+        <div>
+          <div class="glass-card chart-visual">
+            <!-- CSS Candlestick Chart -->
+            <div class="candle-wrap">
+              <div class="candle-wick candle-gold" style="height:18px;"></div>
+              <div class="candle-body candle-gold" style="height:45px;"></div>
+              <div class="candle-wick candle-gold" style="height:12px;"></div>
+            </div>
+            <div class="candle-wrap">
+              <div class="candle-wick candle-red" style="height:22px;"></div>
+              <div class="candle-body candle-red" style="height:30px;"></div>
+              <div class="candle-wick candle-red" style="height:14px;"></div>
+            </div>
+            <div class="candle-wrap">
+              <div class="candle-wick candle-gold" style="height:14px;"></div>
+              <div class="candle-body candle-gold" style="height:62px;"></div>
+              <div class="candle-wick candle-gold" style="height:8px;"></div>
+            </div>
+            <div class="candle-wrap">
+              <div class="candle-wick candle-red" style="height:10px;"></div>
+              <div class="candle-body candle-red" style="height:22px;"></div>
+              <div class="candle-wick candle-red" style="height:18px;"></div>
+            </div>
+            <div class="candle-wrap">
+              <div class="candle-wick candle-blue" style="height:25px;"></div>
+              <div class="candle-body candle-blue" style="height:55px;"></div>
+              <div class="candle-wick candle-blue" style="height:10px;"></div>
+            </div>
+            <div class="candle-wrap">
+              <div class="candle-wick candle-gold" style="height:16px;"></div>
+              <div class="candle-body candle-gold" style="height:80px;"></div>
+              <div class="candle-wick candle-gold" style="height:6px;"></div>
+            </div>
+            <div class="candle-wrap">
+              <div class="candle-wick candle-red" style="height:28px;"></div>
+              <div class="candle-body candle-red" style="height:36px;"></div>
+              <div class="candle-wick candle-red" style="height:12px;"></div>
+            </div>
+            <div class="candle-wrap">
+              <div class="candle-wick candle-gold" style="height:10px;"></div>
+              <div class="candle-body candle-gold" style="height:90px;"></div>
+              <div class="candle-wick candle-gold" style="height:8px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <!-- 5. CURRICULUM (Section 02)                                 -->
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <section id="curriculum" class="section">
+    <div class="section-num">02</div>
+    <div class="container section-inner">
+      <div class="curriculum-header">
+        <h2>What do you learn?</h2>
+        <p class="italic">Four modules that will change how you invest.</p>
+      </div>
+      <div class="curriculum-grid">
+        <div class="glass-card curriculum-card">
+          <div class="card-num">01</div>
+          <div class="card-title">Mastering the Interactive Brokers Platform</div>
+          <div class="card-desc">
+            We map your complete IB setup together: account structure, margin, options, screeners,
+            TWS configuration. Leave knowing every tool in your arsenal.
+          </div>
+          <span class="card-tag">Built Together</span>
+        </div>
+        <div class="glass-card curriculum-card">
+          <div class="card-num">02</div>
+          <div class="card-title">Portfolio Architecture &amp; Position Sizing</div>
+          <div class="card-desc">
+            Install the exact portfolio frameworks we use to manage 6-figure monthly returns.
+            Includes: entry logic, exit rules, position sizing formulas, correlation checks.
+          </div>
+          <span class="card-tag">Ready-to-Use Playbooks</span>
+        </div>
+        <div class="glass-card curriculum-card">
+          <div class="card-num">03</div>
+          <div class="card-title">Risk &amp; Drawdown Control — The Professional Edge</div>
+          <div class="card-desc">
+            Use our proprietary risk system to set hard stop rules, max drawdown limits, and
+            portfolio-level hedges. Nobody in Israel has access to this 🤫
+          </div>
+          <span class="card-tag">Exclusive System</span>
+        </div>
+        <div class="glass-card curriculum-card">
+          <div class="card-num">04</div>
+          <div class="card-title">Live Trading Session + Investor Networking</div>
+          <div class="card-desc">
+            Business owners committed to growing their wealth — absorb knowledge and share
+            strategies with each other in real time.
+          </div>
+          <span class="card-tag">Connections Worth Gold</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <!-- 6. PRICING + REGISTRATION (Section 03)                     -->
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <section id="pricing" class="section section-mid">
+    <div class="section-num">03</div>
+    <div class="container section-inner">
+      <div class="pricing-header">
+        <div class="pricing-badge">★ First of its kind in Israel!</div>
+        <h2>So how much is this masterclass worth to you?</h2>
+      </div>
+
+      <!-- Value Stack Table -->
+      <div class="glass-card" style="padding:8px 0; margin-bottom:40px;">
+        <table class="value-table">
+          <tbody>
+            <tr>
+              <td><span class="check-icon">✓</span> 4 hours of live practical training</td>
+              <td>$1,497</td>
+            </tr>
+            <tr>
+              <td><span class="check-icon">✓</span> Exclusive Portfolio &amp; Strategy Playbook Bundle</td>
+              <td>$997</td>
+            </tr>
+            <tr>
+              <td><span class="check-icon">✓</span> Your Personal Trading System Blueprint</td>
+              <td>$597</td>
+            </tr>
+            <tr>
+              <td><span class="check-icon">✓</span> Pro Risk Management Templates (unavailable anywhere else)</td>
+              <td>$7,999</td>
+            </tr>
+            <tr>
+              <td><span class="check-icon">✓</span> Private investor community for participants</td>
+              <td>$497</td>
+            </tr>
+            <tr class="total-row" style="background:rgba(201,168,76,0.04);">
+              <td style="font-weight:700; color:var(--white);">Total Value:</td>
+              <td style="font-weight:700;">$11,587</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Price Card -->
+      <div class="glass-card price-card">
+        <p class="price-intro">But for our community members only:</p>
+        <div class="price-options">
+          <div class="price-option">
+            <div class="price-option-label">Single Ticket</div>
+            <div class="price-amount">$597</div>
+            <div class="price-note">per person</div>
+          </div>
+          <div class="price-divider"></div>
+          <div class="price-option">
+            <div class="price-option-label">Couple Ticket</div>
+            <div class="price-amount">$950</div>
+            <div class="price-note">for two</div>
+          </div>
+        </div>
+        <p class="coupon-note">
+          Additional $100 off with coupon code <strong>"IBMASTER"</strong> at checkout
+        </p>
+        <p class="early-note">For first 20 registrations only</p>
+      </div>
+
+      <!-- Registration Form -->
+      <div class="reg-section">
+        <div class="glass-card form-card">
+          <div class="form-title">Secure Your Spot</div>
+          <div class="form-subtitle">Fill in your details below</div>
+          <div class="progress-wrap">
+            <div class="progress-fill"></div>
+          </div>
+          <div class="progress-label">16 of 20 spots filled — Only 4 remaining</div>
+          <form action="#" method="POST" id="reg-form-1">
+            <div class="form-field">
+              <label for="name1">Full Name</label>
+              <input type="text" id="name1" name="name" placeholder="Your full name" required />
+            </div>
+            <div class="form-field">
+              <label for="email1">Email Address</label>
+              <input type="email" id="email1" name="email" placeholder="your@email.com" required />
+            </div>
+            <div class="form-field">
+              <label for="phone1">Phone Number</label>
+              <input type="tel" id="phone1" name="phone" placeholder="+972 5X XXX XXXX" required />
+            </div>
+            <div class="form-checkbox">
+              <input type="checkbox" id="consent1" name="consent" required />
+              <label for="consent1">
+                I agree to receive updates and materials related to the Interactive Brokers Masterclass.
+              </label>
+            </div>
+            <div class="form-submit">
+              <button type="submit" class="btn-gold btn-gold-lg">Reserve My Spot Now →</button>
+            </div>
+            <p class="form-sub-note">May 27 · Tel Aviv Financial Center · Limited to 20 participants</p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <!-- 7. TESTIMONIALS (Section 04)                               -->
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <section id="testimonials" class="section">
+    <div class="section-num">03</div>
+    <div class="container section-inner">
+      <div class="testimonials-header">
+        <h2>Hear what our participants say</h2>
+        <p class="italic">what they say about us</p>
+      </div>
+      <div class="testimonials-grid">
+        <div class="glass-card testimonial-card">
+          <span class="quote-mark">"</span>
+          <p class="testimonial-text">
+            I walked in knowing nothing about IB's platform. I walked out with a complete trading system.
+            Best $600 I ever spent.
+          </p>
+          <div class="testimonial-author">
+            <strong>Amit G.</strong><span>Business Owner</span>
+          </div>
+        </div>
+        <div class="glass-card testimonial-card">
+          <span class="quote-mark">"</span>
+          <p class="testimonial-text">
+            The risk management module alone was worth 10x the price. My drawdowns are down 60%
+            since the masterclass.
+          </p>
+          <div class="testimonial-author">
+            <strong>Amit L.</strong><span>Entrepreneur</span>
+          </div>
+        </div>
+        <div class="glass-card testimonial-card">
+          <span class="quote-mark">"</span>
+          <p class="testimonial-text">
+            I've been trading for 5 years and never had a systematic approach. This changed everything.
+          </p>
+          <div class="testimonial-author">
+            <strong>Sivan K.</strong><span>Investor</span>
+          </div>
+        </div>
+        <div class="glass-card testimonial-card">
+          <span class="quote-mark">"</span>
+          <p class="testimonial-text">
+            The live trading session was unlike anything else. Watching real trades execute on IB
+            in real time — incredible.
+          </p>
+          <div class="testimonial-author">
+            <strong>Alex I.</strong><span>CFO</span>
+          </div>
+        </div>
+        <div class="glass-card testimonial-card">
+          <span class="quote-mark">"</span>
+          <p class="testimonial-text">
+            Finally understand how to use IB's full platform. I was using 10% of its power before.
+          </p>
+          <div class="testimonial-author">
+            <strong>Yossi L.</strong><span>Business Owner</span>
+          </div>
+        </div>
+        <div class="glass-card testimonial-card">
+          <span class="quote-mark">"</span>
+          <p class="testimonial-text">
+            The community alone is worth it. The connections I made are priceless.
+          </p>
+          <div class="testimonial-author">
+            <strong>Aviv H.</strong><span>Trader</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <!-- 8. FAQ (Section 05)                                        -->
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <section id="faq" class="section">
+    <div class="section-num">04</div>
+    <div class="container section-inner">
+      <div class="faq-header">
+        <h2>Every question. Answered.</h2>
+        <p class="italic">we have an answer</p>
+      </div>
+      <div class="faq-list">
+        <div class="faq-item">
+          <button class="faq-question" aria-expanded="false">
+            I'm not a professional trader. Is this for me?
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              Yes. The masterclass is built for business owners, executives, and entrepreneurs.
+              No license or coding required. We speak plain English, and the platform handles
+              the complexity. All you need is the desire to win.
+            </div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question" aria-expanded="false">
+            What do I need to bring?
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              A laptop (Mac or Windows), an active Interactive Brokers account (setup guide sent
+              in advance), and the drive to transform your financial future.
+            </div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question" aria-expanded="false">
+            Can I really build a professional trading system in 4 hours?
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              This very page was built using the exact system you'll learn in the masterclass.
+              Yes. Really.
+            </div>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question" aria-expanded="false">
+            Will there be a recording?
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              No. In-person only. That's the magic — 20 investors in one room, live market data,
+              and a coach in real time. This is not an online course. It's a live build session.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <!-- 9. FINAL CTA                                               -->
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <section id="final-cta">
+    <div class="container">
+      <div class="final-badge">IB-MASTER-2705</div>
+      <p class="final-micro">Interactive Brokers mastery like you've never seen before</p>
+      <h2 class="final-h2">
+        The old way of investing is gone.<br />
+        <span>Are you in?</span>
+      </h2>
+
+      <div style="display:flex; justify-content:center;">
+        <div class="glass-card form-card" style="width:100%;">
+          <div class="form-title">Secure Your Spot</div>
+          <div class="form-subtitle">Fill in your details below</div>
+          <div class="progress-wrap">
+            <div class="progress-fill"></div>
+          </div>
+          <div class="progress-label">16 of 20 spots filled — Only 4 remaining</div>
+          <form action="#" method="POST" id="reg-form-2">
+            <div class="form-field">
+              <label for="name2">Full Name</label>
+              <input type="text" id="name2" name="name" placeholder="Your full name" required />
+            </div>
+            <div class="form-field">
+              <label for="email2">Email Address</label>
+              <input type="email" id="email2" name="email" placeholder="your@email.com" required />
+            </div>
+            <div class="form-field">
+              <label for="phone2">Phone Number</label>
+              <input type="tel" id="phone2" name="phone" placeholder="+972 5X XXX XXXX" required />
+            </div>
+            <div class="form-checkbox">
+              <input type="checkbox" id="consent2" name="consent" required />
+              <label for="consent2">
+                I agree to receive updates and materials related to the Interactive Brokers Masterclass.
+              </label>
+            </div>
+            <div class="form-submit">
+              <button type="submit" class="btn-gold btn-gold-lg">Reserve My Spot Now →</button>
+            </div>
+            <p class="form-sub-note">May 27 · Tel Aviv Financial Center · Limited to 20 participants</p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <!-- 10. FOOTER                                                 -->
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <footer>
+    <div class="footer-links">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Use</a>
+    </div>
+    <p class="footer-copy">&copy; 2026 Interactive Brokers Masterclass. All rights reserved.</p>
+  </footer>
+
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <!-- JAVASCRIPT                                                 -->
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <script>
+    // ── Announcement Bar Dismiss ──────────────────────────────────
+    (function () {
+      var bar = document.getElementById('announcement-bar');
+      var btn = document.getElementById('ann-dismiss');
+      var nav = document.getElementById('navbar');
+
+      btn.addEventListener('click', function () {
+        bar.style.display = 'none';
+        // Adjust nav sticky top when bar is gone
+        nav.style.top = '0';
+      });
+    })();
+
+    // ── Scroll-triggered Nav Blur ─────────────────────────────────
+    (function () {
+      var nav = document.getElementById('navbar');
+
+      function onScroll() {
+        if (window.scrollY > 60) {
+          nav.classList.add('scrolled');
+        } else {
+          nav.classList.remove('scrolled');
+        }
+      }
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll(); // run on load
+    })();
+
+    // ── FAQ Accordion ─────────────────────────────────────────────
+    (function () {
+      var items = document.querySelectorAll('.faq-item');
+
+      items.forEach(function (item) {
+        var btn    = item.querySelector('.faq-question');
+        var answer = item.querySelector('.faq-answer');
+
+        btn.addEventListener('click', function () {
+          var isOpen = item.classList.contains('open');
+
+          // Close all
+          items.forEach(function (i) {
+            i.classList.remove('open');
+            i.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
+          });
+
+          // Toggle clicked
+          if (!isOpen) {
+            item.classList.add('open');
+            btn.setAttribute('aria-expanded', 'true');
+          }
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
